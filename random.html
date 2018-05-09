@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>What should I Eat?</title>
+    <link rel="stylesheet" type="text/css" href="./CSS/style.css">
+    <link rel="icon" type="image/gif" href="./CSS/IMG/Food.png">
+    <style>
+    /*loading circle was found online but it looked really cool so I wanted to use it*/
+    .loader,
+      .loader:after {
+      border-radius: 50%;
+      width: 10em;
+      height: 10em;
+      }
+      .loader {
+      margin: 60px auto;
+      font-size: 10px;
+      position: relative;
+      text-indent: -9999em;
+      border-top: 1.1em solid rgba(255, 255, 255, 0.2);
+      border-right: 1.1em solid rgba(255, 255, 255, 0.2);
+      border-bottom: 1.1em solid rgba(255, 255, 255, 0.2);
+      border-left: 1.1em solid #ffffff;
+      -webkit-transform: translateZ(0);
+      -ms-transform: translateZ(0);
+      transform: translateZ(0);
+      -webkit-animation: load8 1.1s infinite linear;
+      animation: load8 1.1s infinite linear;
+      }
+      @-webkit-keyframes load8 {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+      }
+      @keyframes load8 {
+      0% {
+        -webkit-transform: rotate(0deg);
+        transform: rotate(0deg);
+      }
+      100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+      }
+      }
+    </style>
+  </head>
+  <body class="bg2">
+    <!--firstload, load, load2 all are divs that are shown once the page is first open-->
+    <!--once the timer of 2 seconds is up it hides those divs and reveals check which is the checkmark png and the I got it text-->
+    <!--that is all controlled via a timeout function-->
+    <div id="firstload" style="display: block;">
+      <h1><font color="white">Hmm, What should I pick?</font></h1>
+      <div id="load" class="loader" style="display: block;">
+      </div>
+      <h4 id="load2" style="display: block;"><font color="white">Deciding...</font></h4>
+      <div id="check" style="display: none;">
+        <br />
+        <br />
+        <img width="125" height="125" src="./CSS/IMG/check2.png"/>
+        <h2><font color="white">I Got It!</font></h2>
+      </div>
+    </div>
+
+    <!--this is the actuall page-->
+    <div id="complete" style="display: none;">
+                <div>
+                  <!-- Navigation Bar -->
+                  <br />
+                  <a href="./index.html"><img id="headerpic" src="./CSS/IMG/restaurant-icon.png"></a>
+                  <button class="button" onclick="window.location.href='index.html'">Home</button>
+                  <button class="button" onclick="window.location.href='add.html'">Add</button>
+                  <button class="button" onclick="window.location.href='list.php'">List</button>
+                  <button class="button" onclick="window.location.href='random.html'">Randomize</button>
+                </div>
+                <br />
+              <!-- Navigation Bar -->
+              <!--this div is for the resturant information-->
+                <div id="description">
+                </div>
+                <br />
+                <!--for the map-->
+                <div id="map"></div>
+                <br />
+                <!--like/dislike option of the resturant-->
+                <div id="likedislike" style="display: none;">
+                  <img onclick="like()" onmouseover="style.cursor = 'pointer'" height="50" width="50" src="./CSS/IMG/like.png"/>
+                  <img onclick="dislike()" onmouseover="style.cursor = 'pointer'" height="50" width="50" src="./CSS/IMG/dislike.png"/>
+                </div>
+                <div id="thanks" style="display: none;">
+                  <img height="50" width="50" src="./CSS/IMG/check.png"/>
+                </div>
+   </div>
+        <script>
+        //these timeouts control the loading animation
+            setTimeout(function(){
+
+              document.getElementById("load").style.display = "none";
+              document.getElementById("load2").style.display = "none";
+              document.getElementById("check").style.display = "block";
+            },2000);
+            setTimeout(function(){
+              document.getElementById("firstload").style.display = "none";
+              document.getElementById("complete").style.display = "block";
+            },3000);
+
+          //the letter that appears on the red pin on the google maps
+          var customLabel = {
+            Restaurant: {
+              label: 'R'
+            },
+            Bar: {
+              label: 'B'
+            },
+            GrabandGo: {
+              label: 'G'
+            },
+            FastFood: {
+              label: 'F'
+            }
+          };
+          //executed is so that you can only like a place once per page load
+          var executed = false;
+          //so i can use the ID of the currently picked resturant throughout the script (global scope)
+          var id;
+          //this is my like/dislike funtion it essentially sends a GET request with the like dislike and the ID of the resturant to a likeddislike.php file
+          function like()
+          {
+            if(executed == false)
+            {
+              var xhttp;
+              xhttp = new XMLHttpRequest();
+              xhttp.onreadystatechange = function() {
+                if (xhttp.readyState == 4 && xhttp.status == 200) {
+                    document.getElementById("submitted").innerHTML = "form submitted";
+                }
+              };
+              var like = 1;
+              var dislike = 0;
+
+               var queryString = "?id=" + id + "&like=" + like +  "&dislike=" + dislike;
+
+               xhttp.open("GET", "likeddislike.php" + queryString, true);
+               xhttp.send(null);
+
+               //also hides the buttons so you can't click them and turns executed true so you can't vote again unless you reload
+               document.getElementById("likedislike").style.display = "none";
+               document.getElementById("thanks").style.display = "block";
+
+               executed = true;
+            }else {
+              return;
+            }
+          }
+          //similar to like just dislike
+          function dislike()
+          {
+            if(executed == false)
+            {
+              var xhttp;
+              xhttp = new XMLHttpRequest();
+              xhttp.onreadystatechange = function() {
+                if (xhttp.readyState == 4 && xhttp.status == 200) {
+                    document.getElementById("submitted").innerHTML = "form submitted";
+                }
+              };
+              var like = 0;
+              var dislike = 1;
+
+               var queryString = "?id=" + id + "&like=" + like +  "&dislike=" + dislike;
+
+               xhttp.open("GET", "likeddislike.php" + queryString, true);
+               xhttp.send(null);
+
+               //also hides the buttons so you can't click them and turns executed true so you can't vote again unless you reload
+               document.getElementById("likedislike").style.display = "none";
+               document.getElementById("thanks").style.display = "block";
+
+               executed = true;
+            }else {
+              return;
+            }
+          }
+
+          //this is what populates the map with the markers
+            function initMap() {
+            var map = new google.maps.Map(document.getElementById('map'), {
+              //sets the location above New York
+              center: new google.maps.LatLng(40.730610, -73.935242),
+              zoom: 11
+            });
+            var infoWindow = new google.maps.InfoWindow;
+
+              //retrieves the information from randomizer.php
+              downloadUrl('randomizer.php', function(data) {
+                var xml = data.responseXML;
+                var markers = xml.documentElement.getElementsByTagName('marker');
+                Array.prototype.forEach.call(markers, function(markerElem) {
+                  id = markerElem.getAttribute('id');
+                  var name = markerElem.getAttribute('name');
+                  var address = markerElem.getAttribute('address');
+                  var type = markerElem.getAttribute('type');
+                  var like = markerElem.getAttribute('like');
+                  var dislike = markerElem.getAttribute('dislike');
+                  var percentage = diff(parseInt(like), parseInt(dislike));
+                  var point = new google.maps.LatLng(
+                      parseFloat(markerElem.getAttribute('lat')),
+                      parseFloat(markerElem.getAttribute('lng')));
+
+                  //populates the resturant info to description div
+                  document.getElementById('description').innerHTML = "Restaurant Name: <font color='#fc724c'><u>" + name + "</u></font><br />" + "Type: <font color='#fc724c'>" + type + "</font><br />" +  "Restaurant Address: <font color='#fc724c'>" + address + "</font><br /> <font color='#fc724c'>" + percentage + "</font> of people liked <font color='#fc724c'>" + name + "</font>";
+                  document.getElementById("likedislike").style.display = "block";
+                  //also displays the like dislike button ^
+
+                  var infowincontent = document.createElement('div');
+                  var strong = document.createElement('strong');
+                  strong.textContent = name
+                  infowincontent.appendChild(strong);
+                  infowincontent.appendChild(document.createElement('br'));
+
+                  var text = document.createElement('text');
+                  text.textContent = address
+                  infowincontent.appendChild(text);
+                  var icon = customLabel[type.replace(/\s/g, '')] || {};
+                  var marker = new google.maps.Marker({
+                    map: map,
+                    position: point,
+                    label: icon.label
+                  });
+                  marker.addListener('click', function() {
+                    infoWindow.setContent(infowincontent);
+                    infoWindow.open(map, marker);
+                  });
+                });
+
+              });
+            }
+
+            //this calculates the % of people that like/dislike a resturant like + dislike then (like/total)*100
+            function diff(l, d)
+            {
+              if(l == 0 && d == 0)
+              {
+                return "[Not Yet Rated]";
+              }else {
+                var total = l + d;
+                var p = Math.round((l/total)*100);
+                return p + "%";
+              }
+
+            }
+
+          function downloadUrl(url, callback) {
+            var request = window.ActiveXObject ?
+                new ActiveXObject('Microsoft.XMLHTTP') :
+                new XMLHttpRequest;
+
+            request.onreadystatechange = function() {
+              if (request.readyState == 4) {
+                request.onreadystatechange = doNothing;
+                callback(request, request.status);
+              }
+            };
+
+            request.open('GET', url, true);
+            request.send(null);
+          }
+
+          function doNothing() {}
+        </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRkkwQvunsW5s78a5idqWGwwp40OrNhOc&callback=initMap">
+    </script>
+  </body>
+</html>

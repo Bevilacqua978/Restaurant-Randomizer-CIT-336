@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>What should I Eat?</title>
+    <link rel="stylesheet" type="text/css" href="./CSS/style.css">
+    <link rel="icon" type="image/gif" href="./CSS/IMG/Food.png">
+  </head>
+  <body class="bg">
+    <!-- Navigation Bar -->
+    <br />
+      <div>
+        <a href="./index.html"><img id="headerpic" src="./CSS/IMG/restaurant-icon.png"></a>
+        <button class="button" onclick="window.location.href='index.html'">Home</button>
+        <button class="button" onclick="window.location.href='add.html'">Add</button>
+        <button class="button" onclick="window.location.href='list.php'">List</button>
+        <button class="button" onclick="window.location.href='random.html'">Randomize</button>
+      </div>
+    <!-- Navigation Bar -->
+    <h1>Add a Restaurant from New York</h1>
+    <h3>
+      <!--Form for adding the restaurant-->
+    <form name="myForm" action="/ty.html" onsubmit="return addtoDB()" method="post">
+        <p>
+            <label for="restaurant_name">Name:</label>
+            <input type="text" name="restaurant_name" placeholder="Enter the restaurant name"id="restaurant_name"/>
+        </p>
+        <p>
+          <!--Uses an auto fill using google maps to fill addresses--->
+          <label for="restaurant_name">Address:</label>
+          <input id="restaurant_address" size="35" placeholder="Enter the restaurant address"
+                 onFocus="geolocate()" type="text"></input>
+        </p>
+        <p>
+          <!--Lattitude and Longitude are actually retrieved from the above geolocate() ^-->
+            <label for="restaurant_lat">Latitude:</label>
+            <input name="restaurant_lat" id="restaurant_lat" disabled="true"/>
+        </p>
+        <p>
+            <label for="restaurant_lng">Longitude:</label>
+            <input name="restaurant_lng" id="restaurant_lng"disabled="true"/>
+        </p>
+        <p>
+            <label for="restaurant_type">Type:</label>
+            <select name="restaurant_type" id="restaurant_type">
+              <option value="Restaurant">Restaurant</option>
+              <option value="Bar">Bar</option>
+              <option value="Fast Food">Fast Food</option>
+              <option value="Grab and Go">Grab and Go</option>
+            </select>
+        </p>
+        <input type="submit" value="Submit" onclick="return validateForm()">
+        <input type="submit" value="Back" onclick="goHome(); return false;">
+        <!--goes to the main page of the website if you click Back button-->
+    </form>
+    </h3>
+
+    <script>
+    var placeSearch, autocomplete;
+
+    //autocomplete start retrieves the text from the textbox
+    function initAutocomplete() {
+
+      autocomplete = new google.maps.places.Autocomplete(
+          /** @type {!HTMLInputElement} */(document.getElementById('restaurant_address')),
+          {types: ['geocode']});
+      autocomplete.addListener('place_changed', fillInAddress);
+    }
+
+    //auto fills the address info in specifically finds latititude and longitude
+    function fillInAddress() {
+      var place = autocomplete.getPlace();
+      var temp = place.geometry.location.lat();
+      var temp2 = place.geometry.location.lng();
+      document.getElementById("restaurant_lat").value = temp;
+      document.getElementById("restaurant_lng").value = temp2;
+    }
+
+    //this tries to predict the address you are entering in
+    function geolocate() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          var geolocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          };
+          var circle = new google.maps.Circle({
+            center: geolocation,
+            radius: position.coords.accuracy
+          });
+          autocomplete.setBounds(circle.getBounds());
+        });
+      }
+    }
+
+    //ensures no value is left blank so there is no empty submissions in the database
+    function validateForm(){
+      var i1 = document.forms["myForm"]["restaurant_name"].value;
+      var i2 = document.forms["myForm"]["restaurant_address"].value;
+      var i3 = document.forms["myForm"]["restaurant_lat"].value;
+      var i4 = document.forms["myForm"]["restaurant_lng"].value;
+
+      if(i1 == "")
+      {
+        alert("Missing content in Required Field: Name");
+        return false;
+      }
+      if(i2 == "")
+      {
+        alert("Missing content in Required Field: Address");
+        return false;
+      }
+      if(i3 == "")
+      {
+        alert("Missing content in Required Field: Latitude");
+        return false;
+      }
+      if(i4 == "")
+      {
+        alert("Missing content in Required Field: Longitude");
+        return false;
+      }
+
+    }
+
+    //once the form is complete it executes this function and sends the info via a GET request to insert.php
+    function addtoDB() {
+        var xhttp;
+
+        xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (xhttp.readyState == 4 && xhttp.status == 200) {
+          }
+        };
+        var name = document.getElementById('restaurant_name').value;
+         var address = document.getElementById('restaurant_address').value;
+         var lat = document.getElementById('restaurant_lat').value;
+         var lng = document.getElementById('restaurant_lng').value;
+         var type = document.getElementById('restaurant_type').value;
+
+         var queryString = "?name=" + name +  "&address=" + address + "&lat=" + lat + "&lng=" + lng + "&type=" + type;
+
+         xhttp.open("GET", "insert.php" + queryString, true);
+         xhttp.send(null);
+    }
+    function goHome(){
+      window.location.replace("./index.html")
+    }
+</script>
+<!--Google api key-->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBRkkwQvunsW5s78a5idqWGwwp40OrNhOc&libraries=places&callback=initAutocomplete"
+    async defer></script>
+  </body>
+</html>
